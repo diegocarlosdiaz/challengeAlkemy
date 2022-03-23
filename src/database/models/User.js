@@ -1,8 +1,10 @@
+const Genero = require("./Genero")
+
 module.exports =(sequelize, DataTypes) => {
 
-    const User = sequelize.define("User", {
+    let alias = "User"
 
-        id: {
+      let cols = {  id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             allowNull: false,
@@ -24,14 +26,18 @@ module.exports =(sequelize, DataTypes) => {
             allowNull:false
         },
 
-        }, {
+        } 
+        
+        
      
+        let config = { 
         tableName: "user",
         timestamps: false
+        }
+    
 
-    })
+   const User = sequelize.define(alias, cols, config)
 
-   
    return User
 
-}
+    }

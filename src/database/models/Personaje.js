@@ -35,27 +35,28 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
 
-        Peliculas_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
+
     }
 
     let config = {
-        timestamps: false
+        timestamps: false,
+        tableName: "personaje"
     }
 
-    const Personaje = sequelize.define(alias,cols,config)
+    const Personaje = sequelize.define(alias, cols, config)
 
     Personaje.associate = function (models) {
-    
-        Personaje.hasMany(models.Personaje_pelicula, {
+
+        Personaje.belongsToMany(models.Pelicula, {
+            as: "personajes",
+            through: "personaje_pelicula",
             foreignKey: "personaje_id",
-            as: "personaje"
+            otherKey: "pelicula_id",
+            timestamps: false
         })
     }
 
     return Personaje
 
-    
+
 }

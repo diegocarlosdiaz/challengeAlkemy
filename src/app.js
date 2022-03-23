@@ -4,13 +4,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session')
-const multer = require('multer');
-const upload = multer();
+
+
 
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
+var personajesRouter = require('./routes/personajes')
 
 
 var app = express();
@@ -32,6 +33,7 @@ app.use(session( { secret: 'nuestro mensaje secreto' }))
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter )
+app.use('/characters', personajesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
