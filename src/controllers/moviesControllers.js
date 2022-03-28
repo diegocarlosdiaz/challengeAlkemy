@@ -1,23 +1,40 @@
-
 const db = require('../database/models');
 const { Op } = require("sequelize");
 
-const personajesControllers = {
+const moviesControllers = {
     list: (req, res) => {
-        db.Personaje.findAll()
-            .then(personajes => {
+        db.Pelicula.findAll()
+            .then(movies => {
                 let respuesta = {
                     meta: {
                         status: 200,
-                        total: personajes.length
+                        total: movies.length
                     },
-
-                    data: personajes
+                    data: movies
                 }
 
                 res.json(respuesta)
             })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json(err);
+            });
 
+    },
+
+    detail: (req, res) => {
+        db.Pelcula.findByPk(req.params.id)
+            .then(movie => {
+                let respuesta = {
+                    meta: {
+                        status: 200,
+                        total: movie.length,
+                        url: '/movies/:id'
+                    },
+                    data: movie
+                }
+                res.json(respuesta);
+            })
             .catch(err => {
                 console.log(err);
                 res.status(500).json(err);
@@ -25,7 +42,7 @@ const personajesControllers = {
     },
 
     create: (req, res) => {
-        db.Personaje.create(
+        db.Pelicula.create(
             {
                 include: [
                     { association: "personajes" },
@@ -34,11 +51,9 @@ const personajesControllers = {
             },
             {
                 Imagen: req.body.Imagen,
-                Nombre: req.body.Nombre,
-                Edad: req.body.Edad,
-                Peso: req.body.Peso,
-                Historia: req.body.Historia,
-
+                Titulo: req.body.Titulo,
+                FechaDeCreacion: req.body.FechaDeCreacion,
+                Calificacion: req.body.Calificacion,
 
             }).then(confirm => {
 
@@ -49,7 +64,7 @@ const personajesControllers = {
                         meta: {
                             status: 200,
                             total: confirm.length,
-                            url: "characters/create"
+                            url: "movies/create"
                         },
 
                         data: confirm
@@ -60,9 +75,9 @@ const personajesControllers = {
                 else {
                     respuesta = {
                         meta: {
-                            status: 204,
+                            status: 200,
                             total: confirm.length,
-                            url: "characters/create"
+                            url: "movies/create"
                         },
                         data: confirm
                     }
@@ -73,34 +88,33 @@ const personajesControllers = {
 
 
             })
-
             .catch(err => {
                 console.log(err);
                 res.status(500).json(err);
             });
+
     },
 
     update: (req, res) => {
 
-        let personajeId = req.params.id;
+        let movieId = req.params.id;
         db.Personaje.update({
             Imagen: req.body.Imagen,
-            Nombre: req.body.Nombre,
-            Edad: req.body.Edad,
-            Peso: req.body.Peso,
-            Historia: req.body.Historia,
+            Titulo: req.body.Titulo,
+            FechaDeCreacion: req.body.FechaDeCreacion,
+            Calificacion: req.body.Calificacion,
 
         },
             {
                 where: {
-                    id: personajeId
+                    id: movieId
                 }
             }).then(confirm => {
                 let respuesta = {
                     meta: {
                         status: 200,
                         total: confirm.length,
-                        url: "characters/update/:id"
+                        url: "movies/update/:id"
                     },
 
                     data: confirm
@@ -114,9 +128,9 @@ const personajesControllers = {
             });
     },
 
-    destroy: (req, res) => {
-        let personajeId = req.params.id
-        db.Personaje.destroy({ where: personajeId, force: true })
+    delete: (req, res) => {
+        let movieId = req.params.id
+        db.Personaje.destroy({ where: movieId, force: true })
             .then(confirm => {
                 let respuesta;
                 if (confirm) {
@@ -124,7 +138,7 @@ const personajesControllers = {
                         meta: {
                             status: 200,
                             total: confirm.length,
-                            url: 'characters/delete/:id'
+                            url: 'movies/delete/:id'
                         },
 
                         data: confirm
@@ -139,18 +153,30 @@ const personajesControllers = {
             });
     },
 
-    detail: (req, res) => {
-        db.Personaje.findByPk(req.params.id)
-            .then(personaje => {
+    search: (req, res) => {
+        db.Pelicula.findAll({
+            include: [{association: "personajes" },
+                      {association: "peliculas" }],
+            where: {
+                Titulo: {
+                    [Op.substring]: req.query.search
+                }
+            }
+        },
+            {
+                order: [
+                    ['FechaDeCreacion', 'DESC' ]
+                ]
+            }) .then(movies => {
                 let respuesta = {
                     meta: {
-                        status: 200,
-                        total: personaje.length,
-                        url: '/characters/:id'
+                        status : 200,
+                        total: movies.length,
+                        url: '/movies/search/:Titulo'
                     },
-                    data: personaje
+                    data: movies
                 }
-                res.json(respuesta);
+                    res.json(respuesta);
             })
             .catch(err => {
                 console.log(err);
@@ -158,48 +184,10 @@ const personajesControllers = {
             });
     },
 
-    search: (req, res) => {
-        db.Personaje.findAll({
-            where: {
-                [Op.or]: [{
-                    Nombre: {
-                        [Op.substring]: req.query.search
-                    }
-                },
 
-                {
-                    Edad: {
-                        [Op.substring]: req.query.search
-                    }
-                },
 
-                {
-                    Peso: {
-                        [Op.substring]: req.query.search
-                    }
-                }
-
-                ]
-            }
-        }) .then(personajes => {
-            let respuesta = {
-                meta: {
-                    status: 200,
-                    total: personajes.length,
-                    url: '/characters/search'
-                },
-                data: personajes
-            }
-
-            res.json(respuesta)
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
-        });
-    }
 
 
 }
 
-module.exports = personajesControllers
+module.exports = moviesControllers

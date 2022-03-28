@@ -6,6 +6,8 @@ router.get('/', personajesControllers.list)
 router.post('/create', personajesControllers.create)
 router.post('/update/:id', personajesControllers.update)
 router.delete('/delete/:id', personajesControllers.destroy)
+router.get('/:id', personajesControllers.detail)
+router.get('/search', personajesControllers.search)
 
 
 module.exports = router;
